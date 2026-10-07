@@ -1,0 +1,18 @@
+mkdir crypto-poc && cd crypto-poc && git init
+mkdir keys certs src
+
+# RSA keys of two sizes
+openssl genrsa -out keys/rsa2048.pem 2048
+openssl genrsa -out keys/rsa4096.pem 4096
+
+# Elliptic curve key
+openssl ecparam -name prime256v1 -genkey -noout -out keys/ec_p256.pem
+
+# Self-signed certificate (RSA 2048, SHA-256)
+openssl req -x509 -newkey rsa:2048 -nodes -keyout keys/server.key -out certs/server.crt -days 365 -subj "/CN=poc.test.internal"
+
+# PKCS#12 keystore with a weak password (this is a test only)
+openssl pkcs12 -export -inkey keys/server.key -in certs/server.crt -out keys/store.p12 -passout pass:changeit
+
+# A raw AES-256 key stored as a file
+openssl rand -out keys/aes256.key 32
